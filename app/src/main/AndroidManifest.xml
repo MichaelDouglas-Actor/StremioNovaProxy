@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.stremio.novaproxy">
+
+    <application
+        android:label="Nova Proxy"
+        android:theme="@android:style/Theme.NoDisplay"
+        android:allowBackup="false">
+
+        <activity
+            android:name=".ProxyActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+
+            <!-- Match video/* over http/https - same as a normal video player -->
+            <intent-filter android:priority="100">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:mimeType="video/*" />
+            </intent-filter>
+
+            <!-- Common specific MIME types Stremio may use -->
+            <intent-filter android:priority="100">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:mimeType="video/mp4" />
+                <data android:mimeType="video/mkv" />
+                <data android:mimeType="video/x-matroska" />
+                <data android:mimeType="video/avi" />
+            </intent-filter>
+
+            <!-- Android TV / Leanback -->
+            <intent-filter android:priority="100">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:mimeType="video/*" />
+            </intent-filter>
+
+        </activity>
+
+    </application>
+
+</manifest>
