@@ -42,6 +42,30 @@ public class ProxyActivity extends Activity {
             if (url == null) url = incoming.getStringExtra("path");
         }
 
+        if (url != null) {
+            try {
+                String decoded = url;
+
+            // Handle double-encoding safely (max 2 passes)
+                for (int i = 0; i < 2; i++) {
+                    String temp = java.net.URLDecoder.decode(decoded, "UTF-8");
+                    if (temp.equals(decoded)) break;
+                    decoded = temp;
+            }
+
+        // Rebuild safely to normalize all special characters
+                Uri uri = Uri.parse(decoded);
+                String normalized = uri.buildUpon().build().toString();
+        
+                Log.d(TAG, "Normalized URL (" + normalized.length() + " chars): " + normalized);
+        
+                url = normalized;
+
+        } catch (Exception e) {
+            Log.w(TAG, "URL normalization failed, using original: " + e.getMessage());
+        }
+    }
+
         if (url == null || url.isEmpty()) {
             Log.e(TAG, "Could not extract URL from intent");
             Toast.makeText(this, "StremioNovaProxy: No URL found in intent", Toast.LENGTH_LONG).show();
@@ -61,12 +85,19 @@ public class ProxyActivity extends Activity {
 
         // Also attempt setData with the URI in case Nova needs it
         try {
-            novaIntent.setDataAndType(Uri.parse(url), getMimeType(incoming));
+            Uri uri = Uri.parse(url);
+        
+            novaIntent.setData(uri);
+            novaIntent.setType(getMimeType(incoming));
+        
+            // Stronger compatibility for Nova
+            novaIntent.putExtra(Intent.EXTRA_TEXT, url);
+            novaIntent.putExtra("android.intent.extra.STREAM", uri);
+
         } catch (Exception e) {
             Log.w(TAG, "setData failed, relying on extras only: " + e.getMessage());
             novaIntent.setType(getMimeType(incoming));
         }
-
         // Forward any extras from the original intent
         Bundle extras = incoming.getExtras();
         if (extras != null) {
